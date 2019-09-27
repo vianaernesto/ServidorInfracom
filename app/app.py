@@ -1,18 +1,34 @@
 import socket
 
-TCP_IP = '127.0.0.1'
-TCP_PORT = 5005
-BUFFER_SIZE = 20
 
-s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-s.bind((TCP_IP,TCP_PORT))
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind((socket.gethostname(),5000))
 s.listen(1)
 
-conn,addr = s.accept()
-print ('Conection addres: ',addr)
-while 1 :
-    data = conn.recv(BUFFER_SIZE)
-    if not data :breakpoint
-    print ("received data"+ data)
-    conn.send(data)
-conn.close()
+archivo1 = 'tux.jpg'
+archivo2 = 'mario.png'
+archivo = ''
+
+while True:
+    (conn, address) = s.accept()
+    solicitud = conn.recv(1024)
+    if(solicitud == b"archivo1"):
+        archivo = archivo1
+    else:
+        archivo = archivo2
+    
+    print('Abriendo archivo',archivo)
+    with open(archivo, 'rb') as fa:
+        print('se abrió el archivo')
+        fa.seek(0,0)
+        print("enviando archivo.")
+        while True:
+            data = fa.read(1024)
+            conn.send(data)
+            if not data:
+                break
+        fa.close()
+        print("Archivo enviado")
+    break
+s.close()
