@@ -7,14 +7,14 @@ import time
 
 def nuevoCliente(socketCliente,addr, archivo, cliente):
 
-    BUFFER_SIZE = 32
+    BUFFER_SIZE = 2048
     h = hashlib.sha256()
     with open(archivo, 'rb') as fa:
                     print('Archivo preparado')
                     fa.seek(0,0)
                     t1 = time.time()*1000
                     while True:
-                        data = fa.read(1024) 
+                        data = fa.read(BUFFER_SIZE) 
                         h.update(data)
                         if not data:
                             break
@@ -83,8 +83,8 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((socket.gethostname(),5000))
 s.listen(25)
 
-archivo1 = 'archivo1.png'
-archivo2 = 'archivo2.png'
+archivo1 = 'archivo1.mkv'
+archivo2 = 'archivo2.mkv'
 archivo = ""
 
 
