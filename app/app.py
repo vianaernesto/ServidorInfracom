@@ -5,6 +5,19 @@ import sys
 import time
 
 def nuevoCliente(socketCliente,addr, archivo, cliente):
+    
+    h = hashlib.sha256()
+    with open(archivo, 'rb') as fa:
+                    print('Archivo preparado')
+                    fa.seek(0,0)
+                    t1 = time.time()*1000
+                    while True:
+                        data = fa.read(1024) 
+                        h.update(data)
+                        if not data:
+                            break
+                    fa.close()
+    print("Hash generado por el servidor: ", h.digest())
     while True:
         socketCliente.settimeout(1)
         try:
@@ -21,7 +34,7 @@ def nuevoCliente(socketCliente,addr, archivo, cliente):
         except Exception as e1:
             print ('El cliente no envio saludo y se cumplio el tiempo de conexion.')
             break
-        socketCliente.settimeout(1)
+        socketCliente.settimeout(None)
         try:
             ##En este se recibe el mensaje de preparacion del cliente.
             solicitud = socketCliente.recv(1024)
@@ -42,18 +55,26 @@ def nuevoCliente(socketCliente,addr, archivo, cliente):
         except Exception as e2:
             print ('El cliente no envio mensaje de preparacion para recibir archivo y se cumplio el tiempo de conexion.')
             break
-        socketCliente.settimeout(20)
+        socketCliente.settimeout(1)
+        try:
+            solicitudHash = socketCliente.recv(1024)
+            if(solicitudHash== b"hash"):
+                socketCliente.send(h.digest())
+        except Exception as e4:
+            break
+        socketCliente.settimeout(1)
         try: 
             print("Se recibe mensaje de confirmacion:")
             confirmacion = socketCliente.recv(1024)
             if(confirmacion == b"Recibido"):
                 print("Archivo enviado correctamente")
+            elif(confirmacion == b"noIntegridad"):
+                print('El Archivo recibido por el cliente ha sido corrompido.')
             break
         except Exception as e3:
             print ('El cliente no envio confirmacion y se cumplio el tiempo de conexion.')
             break
     tiempoTransferencia = t2-t1
-    socketCliente.shutdown(socket.SHUT_WR)
     socketCliente.close()
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -82,9 +103,14 @@ while(escoger):
 print('Escuchando a clientes')
 numClientes = 0
 while numClientes < 26:
+    if(numClientes == 26):
+        break
     (conn, address) = s.accept()
     numClientes += 1
     _thread.start_new_thread(nuevoCliente,(conn,address,archivo,numClientes))
 s.shutdown(socket.SHUT_WR)
 s.close()
-sys.exit(0)
+try:
+    sys.exit(0)
+except:
+    print("Se apaga el servidor")
