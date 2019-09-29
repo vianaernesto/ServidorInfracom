@@ -20,7 +20,7 @@ while True:
     
     print('Abriendo archivo',archivo)
     with open(archivo, 'rb') as fa:
-        print('se abrió el archivo')
+        print('se abrio el archivo')
         fa.seek(0,0)
         print("enviando archivo.")
         while True:
