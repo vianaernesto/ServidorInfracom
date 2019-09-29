@@ -1,11 +1,13 @@
 import socket
 import hashlib
 import _thread
+import threading
 import sys
 import time
 
 def nuevoCliente(socketCliente,addr, archivo, cliente):
-    
+
+    BUFFER_SIZE = 32
     h = hashlib.sha256()
     with open(archivo, 'rb') as fa:
                     print('Archivo preparado')
@@ -24,7 +26,7 @@ def nuevoCliente(socketCliente,addr, archivo, cliente):
             ##En este se recibe el primer saludo de un cliente
             ##Si el cliente no cumple el protocolo se termina la conexion.
             print("Se recibe al cliente: ", cliente)
-            saludo = socketCliente.recv(1024)
+            saludo = socketCliente.recv(BUFFER_SIZE)
             if(saludo == b"syn"):
                 print("El cliente se ha conectado correctamente")
                 socketCliente.send(b"ack")
@@ -37,7 +39,7 @@ def nuevoCliente(socketCliente,addr, archivo, cliente):
         socketCliente.settimeout(None)
         try:
             ##En este se recibe el mensaje de preparacion del cliente.
-            solicitud = socketCliente.recv(1024)
+            solicitud = socketCliente.recv(BUFFER_SIZE)
             if(solicitud == b"Preparado"):
                 print("El cliente esta preparado para recibir el archivo.")
                 print("Enviando archivo")
@@ -46,7 +48,7 @@ def nuevoCliente(socketCliente,addr, archivo, cliente):
                     fa.seek(0,0)
                     t1 = time.time()*1000
                     while True:
-                        data = fa.read(1024) 
+                        data = fa.read(BUFFER_SIZE) 
                         socketCliente.send(data)
                         if not data:
                             t2 = time.time()*1000
@@ -55,9 +57,9 @@ def nuevoCliente(socketCliente,addr, archivo, cliente):
         except Exception as e2:
             print ('El cliente no envio mensaje de preparacion para recibir archivo y se cumplio el tiempo de conexion.')
             break
-        socketCliente.settimeout(1)
+        socketCliente.settimeout(None)
         try:
-            solicitudHash = socketCliente.recv(1024)
+            solicitudHash = socketCliente.recv(BUFFER_SIZE)
             if(solicitudHash== b"hash"):
                 socketCliente.send(h.digest())
         except Exception as e4:
@@ -65,7 +67,7 @@ def nuevoCliente(socketCliente,addr, archivo, cliente):
         socketCliente.settimeout(1)
         try: 
             print("Se recibe mensaje de confirmacion:")
-            confirmacion = socketCliente.recv(1024)
+            confirmacion = socketCliente.recv(BUFFER_SIZE)
             if(confirmacion == b"Recibido"):
                 print("Archivo enviado correctamente")
             elif(confirmacion == b"noIntegridad"):
@@ -101,13 +103,20 @@ while(escoger):
         print('No digito un numero valido, vuelva a intentarlo')
 
 print('Escuchando a clientes')
+clientesThreads=[]
 numClientes = 0
 while numClientes < 26:
-    if(numClientes == 26):
+    if(numClientes == 25):
         break
     (conn, address) = s.accept()
     numClientes += 1
     _thread.start_new_thread(nuevoCliente,(conn,address,archivo,numClientes))
+    ##clientesThreads.append(threading.Thread(target=nuevoCliente, args=(conn,address,archivo,numClientes),)) 
+##for x in clientesThreads:
+##    x.start()
+
+##for y in clientesThreads:
+##    y.join()
 s.shutdown(socket.SHUT_WR)
 s.close()
 try:
