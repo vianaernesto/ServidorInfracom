@@ -1,1 +1,2 @@
-Servidor!1Servidor
+Usuario: cliente
+Clave:Servidor!1Servidor
