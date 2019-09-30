@@ -70,7 +70,7 @@ def nuevoCliente(socketCliente,addr, archivo, cliente):
                     fa.close()
     print("Hash generado por el servidor: ", h.digest())
     while True:
-        socketCliente.settimeout(50)
+        socketCliente.settimeout(250)
         try:
             ##En este se recibe el primer saludo de un cliente
             ##Si el cliente no cumple el protocolo se termina la conexion.
@@ -85,7 +85,7 @@ def nuevoCliente(socketCliente,addr, archivo, cliente):
         except Exception as e1:
             print ('El cliente no envio saludo y se cumplio el tiempo de conexion.')
             break
-        socketCliente.settimeout(None)
+        socketCliente.settimeout(1000)
         try:
             ##En este se recibe el mensaje de preparacion del cliente.
             solicitud = socketCliente.recv(BUFFER_SIZE)
@@ -106,14 +106,14 @@ def nuevoCliente(socketCliente,addr, archivo, cliente):
         except Exception as e2:
             print ('El cliente no envio mensaje de preparacion para recibir archivo y se cumplio el tiempo de conexion.')
             break
-        socketCliente.settimeout(None)
+        socketCliente.settimeout(1000)
         try:
             solicitudHash = socketCliente.recv(BUFFER_SIZE)
             if(solicitudHash== b"hash"):
                 socketCliente.send(h.digest())
         except Exception as e4:
             break
-        socketCliente.settimeout(50)
+        socketCliente.settimeout(250)
         try: 
             print("Se recibe mensaje de confirmacion:")
             confirmacion = socketCliente.recv(BUFFER_SIZE)
@@ -157,8 +157,8 @@ nombreArchivo = archivo
 print('Escuchando a clientes')
 clientesThreads=[]
 numClientes = 0
-while numClientes < 26:
-    if(numClientes == 25):
+while numClientes < 2:
+    if(numClientes == 1):
         break
     (conn, address) = s.accept()
     numClientes += 1
