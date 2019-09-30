@@ -1,0 +1,13 @@
+Fecha de la prueba 29-Sep-2019(21-03-06)
+Nombre del archivo enviado: archivo1.mkv
+Peso del archivo enviado:  131572000 Bytes
+Aqui estan todos los clientes identificados con su direccion IP:
+Cliente 1 :192.168.0.13
+Cliente 2 :192.168.0.13
+Aqui se muestran todas las solicitudes, si fueron existosas dicen True, de lo contrario dicen false
+Solicitud 1 :True
+Aqui se muestran los tiempos de las solicitudes.
+Tiempo Solicitud 1 :3397.44775390625 ms
+Paquetes Enviados: 72436.141
+Paquetes Recibidos: 4
+Bytes Transmitidos: 148349216.0 Bytes
